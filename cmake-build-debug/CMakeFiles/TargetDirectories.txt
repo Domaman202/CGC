@@ -1,3 +1,0 @@
-/home/dmn/Workspace/Projects/CGC/cmake-build-debug/CMakeFiles/CGC.dir
-/home/dmn/Workspace/Projects/CGC/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/dmn/Workspace/Projects/CGC/cmake-build-debug/CMakeFiles/rebuild_cache.dir
