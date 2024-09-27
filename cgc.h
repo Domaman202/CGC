@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
-// CGC
+// CGC (Constants)
+
+#ifndef CGC_MARK_STACK_SIZE
+#define CGC_MARK_STACK_SIZE (256*4)
+#endif
 
 // CGC (Typedef)
 
@@ -36,7 +40,7 @@ void cgc_init();
 void cgc_ref(cgc_obj_info_t* ptr);
 void cgc_unref(cgc_obj_info_t* ptr);
 
-// CGC (defines)
+// CGC (Defines)
 
 #define CGC_DEFINE_ALLOC(TYPE, FIELD_COUNT, ARGS, BODY) \
     TYPE* TYPE##_alloc ARGS { \

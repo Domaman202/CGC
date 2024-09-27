@@ -7,8 +7,6 @@
 cgc_obj_info_t* cgc_last_obj;
 uint8_t cgc_gc_age;
 
-#define CGC_MARK_STACK_SIZE 1024
-
 void cgc_mark(cgc_obj_info_t* ptr) {
     cgc_obj_info_t** stack = calloc(CGC_MARK_STACK_SIZE, sizeof(cgc_obj_info_t*));
     uint16_t stack_top = 0;
