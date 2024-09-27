@@ -75,7 +75,7 @@ void cgc_unref(cgc_obj_info_t* ptr);
     CGC_PTR_ENTER(NAME);
 
 #define CGC_PTR_ALLOC(TYPE, ...) TYPE##_alloc(__VA_ARGS__)
-#define CGC_PTR_ENTER(PTR) cgc_ref((cgc_obj_info_t*) (void*) (PTR))
-#define CGC_PTR_EXIT(PTR) cgc_unref((cgc_obj_info_t*) (void*) (PTR))
+#define CGC_PTR_ENTER(PTR) cgc_ref((void*) (PTR))
+#define CGC_PTR_EXIT(PTR) cgc_unref((void*) (PTR))
 
 #endif // __CGC_H__

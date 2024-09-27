@@ -1,5 +1,4 @@
 #include "cgc.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -8,28 +7,9 @@
 cgc_obj_info_t* cgc_last_obj;
 uint8_t cgc_gc_age;
 
-void cgc_mark_old(cgc_obj_info_t* ptr) {
-    ptr->gc_mark = cgc_gc_age;
-    cgc_obj_info_t** fields = (void*) ((uintptr_t) ptr + sizeof(cgc_obj_info_t));
-    for (int i = 0; i < ptr->field_count; ++i) {
-        cgc_obj_info_t* field = fields[i];
-        if (field && field->gc_mark != cgc_gc_age) {
-            cgc_mark_old(field);
-        }
-    }
-}
-
 #define CGC_MARK_STACK_SIZE 1024
 
-void cgc_mark_new_dbg_print(cgc_obj_info_t** stack, uint16_t stack_top, uint16_t stack_ptr, const char* text) {
-    printf(text);
-    for (int i = 0; i < stack_top; ++i) {
-        printf("[%d] (%d|%d) [%d|%d]\n", i, stack[i]->debug_left, stack[i]->debug_right, stack_top, stack_ptr);
-    }
-    printf("\n");
-}
-
-void cgc_mark_new(cgc_obj_info_t* ptr) {
+void cgc_mark(cgc_obj_info_t* ptr) {
     cgc_obj_info_t** stack = calloc(CGC_MARK_STACK_SIZE, sizeof(cgc_obj_info_t*));
     uint16_t stack_top = 0;
     uint16_t stack_ptr = 0;
@@ -43,6 +23,7 @@ void cgc_mark_new(cgc_obj_info_t* ptr) {
             memcpy(stack, stack + stack_ptr, count * sizeof(cgc_obj_info_t*));
             stack_top = count;
             stack_ptr = 0;
+            stack[stack_top + 1] = nullptr;
         }
         //
         for (int i = 0; i < ptr->field_count; ++i) {
@@ -58,15 +39,12 @@ void cgc_mark_new(cgc_obj_info_t* ptr) {
     free(stack);
 }
 
-#define CGC_MARK(PTR) cgc_mark_new((PTR))
-
 void cgc_gc_marking() {
     cgc_gc_age *= 3;
     cgc_obj_info_t* last = cgc_last_obj;
     while (last) {
-        if (last->ref_count) {
-            CGC_MARK(last);
-        }
+        if (last->ref_count)
+            cgc_mark(last);
         last = (void*) last->prev;
     }
 }
