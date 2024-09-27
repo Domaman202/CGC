@@ -14,58 +14,59 @@
 typedef void (*cgc_dealloc_t)(void*);
 
 typedef struct {
-    struct cgc_obj_info_t* prev;
+    struct cgc_ptr_t* prev;
     cgc_dealloc_t dealloc;
     uint16_t ref_count;
     uint16_t field_count;
-    uint8_t gc_mark;
-    // uint8_t reserved; // alignment free space
-    uint8_t debug_left : 4;
-    uint8_t debug_right : 4;
-} cgc_obj_info_t;
+    uint16_t gc_mark;
+    // // DEBUG // //
+    uint32_t debug_left;
+    uint32_t debug_right;
+} cgc_ptr_t;
+
+typedef struct {
+    cgc_ptr_t* head_obj;
+    uint16_t gc_age;
+    uint16_t obj_stack_size;
+} cgc_t;
 
 // CGC (GC Utils)
 
-extern cgc_obj_info_t* cgc_last_obj;
-extern uint8_t cgc_gc_age;
-
-void cgc_mark(cgc_obj_info_t* ptr);
-void cgc_gc_marking();
-void cgc_gc_collecting();
-void cgc_gc();
-void cgc_init();
+void cgc_init(cgc_t*);
+void cgc_deinit(cgc_t*);
+void cgc_gc(cgc_t*);
 
 // CGC (Reference Utils)
 
-void cgc_ref(cgc_obj_info_t* ptr);
-void cgc_unref(cgc_obj_info_t* ptr);
+void cgc_ref(cgc_ptr_t* ptr);
+void cgc_unref(cgc_ptr_t* ptr);
 
 // CGC (Defines)
 
 #define CGC_DEFINE_ALLOC(TYPE, FIELD_COUNT, ARGS, BODY) \
     TYPE* TYPE##_alloc ARGS { \
         TYPE* ptr = malloc(sizeof(TYPE)); \
-        CGC_INFO_INIT(TYPE, ptr, (FIELD_COUNT)); \
+        CGC_INFO_INIT(gc, TYPE, ptr, (FIELD_COUNT)); \
         (BODY); \
         return ptr; \
     }
 
-#define CGC_INFO_INIT(TYPE, PTR, FIELD_COUNT) \
+#define CGC_INFO_INIT(GC, TYPE, PTR, FIELD_COUNT) \
     { \
-        cgc_obj_info_t* __cgc_info = (void*) (PTR); \
-        __cgc_info->prev = (void*) cgc_last_obj->prev; \
-        cgc_last_obj->prev = (void*) __cgc_info; \
-        __cgc_info->dealloc = (void*) TYPE##_dealloc; \
-        __cgc_info->ref_count = 0; \
-        __cgc_info->field_count = (FIELD_COUNT); \
-        __cgc_info->gc_mark = 0; \
+        cgc_ptr_t* __cgc_ptr = (void*) (PTR); \
+        __cgc_ptr->prev = (void*) gc->head_obj->prev; \
+        gc->head_obj->prev = (void*) __cgc_ptr; \
+        __cgc_ptr->dealloc = (void*) TYPE##_dealloc; \
+        __cgc_ptr->ref_count = 0; \
+        __cgc_ptr->field_count = (FIELD_COUNT); \
+        __cgc_ptr->gc_mark = 0; \
     }
 
 #define CGC_DBG_INFO_INIT(PTR, LEFT, RIGHT) \
     { \
-        cgc_obj_info_t* __cgc_info = (void*) (PTR); \
-        __cgc_info->debug_left = (LEFT); \
-        __cgc_info->debug_right = (RIGHT); \
+        cgc_ptr_t* __cgc_ptr = (void*) (PTR); \
+        __cgc_ptr->debug_left = (LEFT); \
+        __cgc_ptr->debug_right = (RIGHT); \
     }
 
 #define CGC_DEFINE_DEALLOC(TYPE, BODY) \
