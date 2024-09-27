@@ -49,9 +49,8 @@ CGC_DEFINE_ALLOC(test_obj_c, 2, (const cgc_t* gc, void* left, void* right), {
 })
 
 int main(void) {
-    // cgc init
-    cgc_t* gc = malloc(sizeof(cgc_t));
-    cgc_init(gc);
+    // cgc alloc
+    cgc_t* gc = cgc_alloc();
 
     // TEST BEGIN
 
@@ -85,8 +84,7 @@ int main(void) {
 
     // TEST END
 
-    // cgc deinit
-    cgc_deinit(gc);
-    free(gc);
+    // cgc free
+    cgc_free(gc);
     return 0;
 }

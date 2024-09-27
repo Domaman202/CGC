@@ -65,8 +65,10 @@ void cgc_gc(cgc_t* gc) {
     cgc_gc_collecting(gc);
 }
 
-void cgc_init(cgc_t* gc) {
-    // root object init
+cgc_t* cgc_alloc() {
+    // alloc struct
+    cgc_t* gc = malloc(sizeof(cgc_t));
+    // alloc & init root object
     cgc_ptr_t* root_obj = malloc(sizeof(cgc_ptr_t));
     root_obj->prev = nullptr;
     root_obj->dealloc = nullptr; // no deallocating
@@ -78,10 +80,18 @@ void cgc_init(cgc_t* gc) {
     gc->head_obj = root_obj;
     // gc age init
     gc->gc_age = 127;
+    // return struct
+    return gc;
 }
 
-void cgc_deinit(cgc_t* gc) {
-    // todo: free all objects
+void cgc_free(cgc_t* gc) {
+    cgc_ptr_t* last = gc->head_obj;
+    while (last) {
+        void* ptr = last;
+        last = (void*) last->prev;
+        free(ptr);
+    }
+    free(gc);
 }
 
 // CGC (Reference Utils)

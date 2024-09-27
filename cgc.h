@@ -32,8 +32,8 @@ typedef struct {
 
 // CGC (GC Utils)
 
-void cgc_init(cgc_t*);
-void cgc_deinit(cgc_t*);
+cgc_t* cgc_alloc();
+void cgc_free(cgc_t*);
 void cgc_gc(cgc_t*);
 
 // CGC (Reference Utils)
